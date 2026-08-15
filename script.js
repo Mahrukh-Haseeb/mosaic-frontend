@@ -2,6 +2,27 @@
 (() => {
 "use strict";
 
+/* 0. BACKEND API CONNECTION */
+const API_BASE_URL = "https://mosaic-io5o.vercel.app";
+const DEMO_USER_ID = "6d6ebef4-6b93-4071-be85-aa30281975fd";
+
+async function callAPI(endpoint, options = {}) {
+    try {
+        const url = `${API_BASE_URL}${endpoint}`;
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...(options.headers || {})
+            }
+        });
+        return await response.json();
+    } catch (error) {
+        console.log('API call failed, using fallback:', error);
+        return null;
+    }
+}
+
 /* 1. GLOBAL STATE */
 const DIMS = {
   sleep:{name:"Sleep",short:"Sleep",color:"#9B8FEF",bg:"#DCD6FF",icon:"moon",desc:"How rested do you generally feel?",low:"Very low",high:"Very rested",
@@ -148,11 +169,52 @@ function setupWhatIf(k){
   $("#rippleCore").textContent=DIMS[k].short.toUpperCase();$("#rippleCore").style.background=DIMS[k].bg;$("#rippleCore").style.color=DIMS[k].color;
   updateWhatIf();
 }
-function updateWhatIf(){
-  const k=state.whatIf,v=safeNum($("#whatIfRange")?.value,state.values[k]??5);
-  if(!DIMS[k])return;$("#whatIfAfter").textContent=v;$("#whatIfValue").textContent=`${v} / 10`;
-  const chain=whatIfChain(k,v);$("#pathChain").innerHTML=chain.map((x,i)=>i?`<i>→</i><span>${x}</span>`:`<span>${x}</span>`).join("");
-  $("#whatIfText").textContent=whatIfText(k,v);$("#whatIfCallout").textContent=whatIfCallout(k,v);
+function updateWhatIf() {
+    const k = state.whatIf;
+    const v = safeNum($("#whatIfRange")?.value, state.values[k] ?? 5);
+    if (!DIMS[k]) return;
+    $("#whatIfAfter").textContent = v;
+    $("#whatIfValue").textContent = `${v} / 10`;
+
+    // Try to get simulation from backend
+    callAPI('/ai/simulate', {
+        method: 'POST',
+        body: JSON.stringify({
+            factor: k,
+            new_value: v,
+            user_id: DEMO_USER_ID
+        })
+    })
+    .then(data => {
+        if (data && data.predicted_impact) {
+            const changes = data.predicted_impact.changes;
+            let chain = [DIMS[k].short];
+            for (const [factor, change] of Object.entries(changes)) {
+                if (Math.abs(change.delta) > 0.5) {
+                    chain.push(factor.charAt(0).toUpperCase() + factor.slice(1));
+                }
+            }
+            $("#pathChain").innerHTML = chain.map((x, i) => 
+                i ? `<i>→</i><span>${x}</span>` : `<span>${x}</span>`
+            ).join("");
+            $("#whatIfText").textContent = `Changing ${DIMS[k].short} to ${v}/10 may influence ${Object.keys(changes).slice(0,3).join(', ')}.`;
+            $("#whatIfCallout").textContent = "One change can touch more than one part of your wellbeing.";
+        } else {
+            // Fallback to her original logic
+            fallbackWhatIf();
+        }
+    })
+    .catch(() => fallbackWhatIf());
+
+    // Her original logic (preserved as fallback)
+    function fallbackWhatIf() {
+        const chain = whatIfChain(k, v);
+        $("#pathChain").innerHTML = chain.map((x, i) => 
+            i ? `<i>→</i><span>${x}</span>` : `<span>${x}</span>`
+        ).join("");
+        $("#whatIfText").textContent = whatIfText(k, v);
+        $("#whatIfCallout").textContent = whatIfCallout(k, v);
+    }
 }
 function whatIfChain(k,v){
   const map={sleep:["Sleep","Recovery","Energy","Attention"],movement:["Movement","Energy","Mood"],nutrition:["Nutrition","Energy","Routine","Mood"],stress:["Stress","Recovery","Attention","Sleep"],social:["Connection","Mood","Joy"],joy:["Joy","Mood","Connection"]};return map[k]||[DIMS[k].name,"Wellbeing"];
@@ -170,15 +232,41 @@ $("#whatIfRange").addEventListener("input",e=>{const k=state.whatIf,v=safeNum(e.
 function ripple(){const r=$("#rippleVisual");r.classList.remove("rippling");void r.offsetWidth;r.classList.add("rippling");}
 
 /* 8. AI-STYLE INSIGHTS */
-function updateGuide(){
-  const v=state.values, candidates=[
-    {score:(10-v.sleep)+v.stress,title:"Recovery may be a useful place to start.",why:`Your reported sleep is ${v.sleep<5?"relatively low":"moderate"} while your reported stress is ${v.stress>6?"relatively high":"not especially high"}. Sleep and stress can influence one another, so a small recovery-focused action may be a reasonable first experiment.`,next:"Try a 60-second breathing reset.",reset:"breath"},
-    {score:(10-v.movement)+2,title:"Movement may be an approachable place to begin.",why:`Your reported movement is ${v.movement<5?"relatively low":"moderate"}. A short activity break can be easier than trying to change everything at once.`,next:"Take a two-minute movement reset.",reset:"movement"},
-    {score:(10-v.social)+1,title:"Connection is part of wellbeing too.",why:`Your reported social connection is ${v.social<5?"relatively low":"moderate"}. Consider a small, low-pressure moment with someone you enjoy talking to.`,next:"Send one message to someone you value.",reset:"joy"},
-    {score:(10-v.joy)+1,title:"Make room for something enjoyable.",why:`Your reported joy is ${v.joy<5?"relatively low":"moderate"}. Wellbeing isn't only about productivity; making space for something enjoyable matters too.`,next:"Choose a five-minute joy mission.",reset:"joy"}
-  ];
-  if(v.stress>7)candidates[0].score+=3;candidates.sort((a,b)=>b.score-a.score);const g=candidates[0];
-  $("#guideTitle").textContent=g.title;$("#guideWhy").textContent=g.why;$("#guideNext").textContent=g.next;$("#startGuideReset").dataset.reset=g.reset;
+function updateGuide() {
+    const v = state.values;
+    
+    // Try to get AI insights from backend
+    callAPI(`/ai/insights?user_id=${DEMO_USER_ID}`)
+        .then(data => {
+            if (data && data.insights && data.insights.length > 0) {
+                const insight = data.insights[0];
+                $("#guideTitle").textContent = insight.split('.')[0] + '.';
+                $("#guideWhy").textContent = insight;
+                $("#guideNext").textContent = "Try one small experiment today.";
+                $("#startGuideReset").dataset.reset = "breath";
+            } else {
+                // Fallback to her original logic
+                fallbackGuide();
+            }
+        })
+        .catch(() => fallbackGuide());
+    
+    // Her original logic (preserved as fallback)
+    function fallbackGuide() {
+        const candidates = [
+            {score:(10-v.sleep)+v.stress,title:"Recovery may be a useful place to start.",why:`Your reported sleep is ${v.sleep<5?"relatively low":"moderate"} while your reported stress is ${v.stress>6?"relatively high":"not especially high"}. Sleep and stress can influence one another, so a small recovery-focused action may be a reasonable first experiment.`,next:"Try a 60-second breathing reset.",reset:"breath"},
+            {score:(10-v.movement)+2,title:"Movement may be an approachable place to begin.",why:`Your reported movement is ${v.movement<5?"relatively low":"moderate"}. A short activity break can be easier than trying to change everything at once.`,next:"Take a two-minute movement reset.",reset:"movement"},
+            {score:(10-v.social)+1,title:"Connection is part of wellbeing too.",why:`Your reported social connection is ${v.social<5?"relatively low":"moderate"}. Consider a small, low-pressure moment with someone you enjoy talking to.`,next:"Send one message to someone you value.",reset:"joy"},
+            {score:(10-v.joy)+1,title:"Make room for something enjoyable.",why:`Your reported joy is ${v.joy<5?"relatively low":"moderate"}. Wellbeing isn't only about productivity; making space for something enjoyable matters too.`,next:"Choose a five-minute joy mission.",reset:"joy"}
+        ];
+        if(v.stress>7)candidates[0].score+=3;
+        candidates.sort((a,b)=>b.score-a.score);
+        const g=candidates[0];
+        $("#guideTitle").textContent = g.title;
+        $("#guideWhy").textContent = g.why;
+        $("#guideNext").textContent = g.next;
+        $("#startGuideReset").dataset.reset = g.reset;
+    }
 }
 $("#askGuide").addEventListener("click",()=>{updateGuide();document.querySelector("#guide").scrollIntoView({behavior:"smooth"})});
 $("#startGuideReset").addEventListener("click",()=>{const r=$("#startGuideReset").dataset.reset;if(r==="breath")startBreath();else if(r==="movement")startMovement();else document.querySelector("#joy").scrollIntoView({behavior:"smooth"})});
