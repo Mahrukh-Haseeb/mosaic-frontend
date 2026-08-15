@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MOSAIC — an interactive everyday wellbeing experience.">
+  <title>MOSAIC — Your wellbeing is a system.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.min.js"></script>
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><div class="ambient ambient-c"></div>
+
+  <header class="site-nav" id="top">
+    <a class="brand" href="#hero" aria-label="MOSAIC home">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <span>MOSAIC</span>
+    </a>
+    <button class="mobile-menu" id="mobileMenu" aria-expanded="false" aria-controls="navLinks"><i data-lucide="menu"></i><span class="sr-only">Menu</span></button>
+    <nav id="navLinks" aria-label="Main navigation">
+      <a href="#ecosystem">Explore</a><a href="#builder">Your Mosaic</a><a href="#science">Science</a><a href="#resets">Reset</a><a href="#joy">Joy</a>
+      <a class="nav-cta" href="#builder">Build my mosaic</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero section" id="hero">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="eyebrow-dot"></span> Health · Wellness · Happiness</span>
+        <h1>Your wellbeing<br>isn't one thing.<br><em>It's a system.</em></h1>
+        <p>Explore how sleep, movement, nutrition, stress, connection and joy interact — and discover which small change you could make next.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" data-scroll="#builder">Build my mosaic <i data-lucide="arrow-right"></i></button>
+          <button class="btn btn-ghost" id="demoBtn">Try the demo <i data-lucide="play"></i></button>
+        </div>
+        <small class="micro-note"><i data-lucide="sparkles"></i> Designed for everyday wellbeing</small>
+      </div>
+      <div class="hero-visual">
+        <div class="mini-ecosystem" id="heroEcosystem" aria-label="Preview of the MOSAIC ecosystem">
+          <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
+          <div class="hero-node n-sleep"><span>Sleep</span></div><div class="hero-node n-move"><span>Movement</span></div>
+          <div class="hero-node n-nutrition"><span>Nutrition</span></div><div class="hero-node n-stress"><span>Stress</span></div>
+          <div class="hero-node n-social"><span>Social</span></div><div class="hero-node n-joy"><span>Joy</span></div>
+          <div class="hero-you"><span>YOU</span></div>
+          <svg class="hero-lines" viewBox="0 0 600 600" aria-hidden="true">
+            <path d="M300 300 L145 150 M300 300 L450 145 M300 300 L505 300 M300 300 L445 455 M300 300 L150 455 M300 300 L95 300"/>
+          </svg>
+          <span class="visual-caption">six pieces · one system</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section how" id="how">
+      <div class="section-heading centered"><span class="eyebrow">A simpler way in</span><h2>Move one piece. See the bigger picture.</h2></div>
+      <div class="step-grid">
+        <article class="step-card lavender"><span class="step-number">01</span><i data-lucide="scan-eye"></i><h3>See</h3><p>Understand your current wellness snapshot without judging it.</p></article>
+        <article class="step-card mint"><span class="step-number">02</span><i data-lucide="shuffle"></i><h3>Experiment</h3><p>Change one factor and explore possible connections.</p></article>
+        <article class="step-card peach"><span class="step-number">03</span><i data-lucide="footprints"></i><h3>Act</h3><p>Turn an insight into one small, realistic action.</p></article>
+      </div>
+    </section>
+
+    <section class="section builder" id="builder">
+      <div class="section-heading"><span class="eyebrow">01 · Your snapshot</span><h2>Start with how you're feeling.</h2><p>There are no right answers. This is simply your personal snapshot.</p></div>
+      <div class="builder-layout">
+        <div class="slider-grid" id="sliderGrid"></div>
+        <aside class="snapshot-card">
+          <div class="snapshot-top"><span>YOUR MOSAIC</span><span class="live-dot">LIVE</span></div>
+          <div class="score-ring" id="scoreRing"><strong id="overallScore">5.0</strong><span>/ 10</span></div>
+          <p id="snapshotLabel">A balanced place to begin.</p>
+          <button class="btn btn-primary wide" id="enterMosaic">Enter my mosaic <i data-lucide="arrow-down"></i></button>
+          <small>This is not a medical measurement.</small>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section ecosystem-section" id="ecosystem">
+      <div class="section-heading centered"><span class="eyebrow">02 · Interactive ecosystem</span><h2>See the pieces talking to each other.</h2><p>Drag, hover and select a piece. Then ask what could happen if you moved it.</p></div>
+      <div class="ecosystem-layout">
+        <div class="ecosystem-stage" id="ecosystemStage">
+          <div id="threeRoot"></div>
+          <div id="fallbackEcosystem" class="fallback-ecosystem" aria-label="2D wellbeing ecosystem"></div>
+          <div class="stage-hint"><i data-lucide="mouse-pointer-2"></i><span>Drag · scroll · select</span></div>
+        </div>
+        <aside class="node-panel" id="nodePanel">
+          <div class="panel-kicker" id="nodeKicker">SELECT A PIECE</div>
+          <div class="node-title-row"><span class="node-icon" id="nodeIcon"></span><h3 id="nodeName">Your Mosaic</h3><strong id="nodeValue">—</strong></div>
+          <p id="nodeDescription">Select a pastel node to explore its everyday role and possible connections.</p>
+          <div class="connection-list" id="connectionList"></div>
+          <button class="btn btn-soft wide" id="explorePiece">Explore this piece <i data-lucide="arrow-right"></i></button>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section whatif" id="whatif">
+      <div class="whatif-card">
+        <div class="whatif-copy"><span class="eyebrow">03 · Experiment</span><h2>What if?</h2><p>What happens when you move one piece?</p>
+          <div class="whatif-select" id="whatIfButtons"></div>
+          <div class="big-change"><span id="whatIfName">Sleep</span><strong><b id="whatIfBefore">5</b><span>→</span><b id="whatIfAfter">8</b></strong></div>
+          <label class="range-label" for="whatIfRange"><span>Move the piece</span><span id="whatIfValue">8 / 10</span></label>
+          <input id="whatIfRange" class="big-range" type="range" min="0" max="10" step="1" value="8" aria-label="What-if value">
+        </div>
+        <div class="ripple-visual" id="rippleVisual">
+          <div class="ripple-ring r1"></div><div class="ripple-ring r2"></div><div class="ripple-ring r3"></div>
+          <div class="ripple-core" id="rippleCore">SLEEP</div>
+          <div class="ripple-path path-a"></div><div class="ripple-path path-b"></div>
+          <div class="ripple-path path-c"></div>
+        </div>
+        <div class="whatif-insight">
+          <span class="eyebrow">Possible connection</span>
+          <div class="path-chain" id="pathChain"></div>
+          <p id="whatIfText">Sleep is associated with recovery and attention. Individual experiences vary.</p>
+          <div class="callout"><i data-lucide="lightbulb"></i><span id="whatIfCallout">A small experiment can be more useful than trying to change everything.</span></div>
+          <button class="btn btn-primary" id="askGuide">Ask Mosaic Guide <i data-lucide="sparkles"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section guide-section" id="guide">
+      <div class="guide-card">
+        <div class="guide-orb"><span>✦</span></div>
+        <div class="guide-content"><span class="eyebrow">Mosaic Guide</span><h2 id="guideTitle">Recovery may be a useful place to start.</h2>
+          <div class="guide-block"><span>Why this connection?</span><p id="guideWhy">Your reported sleep and stress give us a useful place to experiment. Sleep and stress can influence one another, so a small recovery-focused action may be a reasonable first experiment.</p></div>
+          <div class="guide-block next"><span>One small next step</span><p id="guideNext">Try a 60-second breathing reset.</p></div>
+          <button class="btn btn-primary" id="startGuideReset">Start reset <i data-lucide="play"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section science" id="science">
+      <div class="section-heading centered"><span class="eyebrow">04 · Evidence, simply</span><h2>The science behind the mosaic.</h2><p>Wellbeing is interconnected. Explore six everyday dimensions.</p></div>
+      <div class="science-grid" id="scienceGrid"></div>
+      <div class="source-note"><i data-lucide="book-open"></i><span>Educational summaries. Sources are provided as organizations rather than invented citations.</span><span class="source-chip">NIH</span><span class="source-chip">CDC</span><span class="source-chip">WHO</span></div>
+    </section>
+
+    <section class="section resets" id="resets">
+      <div class="section-heading"><span class="eyebrow">05 · Quick resets</span><h2>Small pauses count.</h2><p>Simple, optional experiences — not health tracking.</p></div>
+      <div class="reset-grid">
+        <article class="reset-card breathing"><div class="reset-icon"><i data-lucide="wind"></i></div><span class="reset-label">60 seconds</span><h3>Breathing reset</h3><p>Slow down for a minute and give yourself a transition.</p>
+          <div class="breath-circle" id="breathCircle"><span id="breathState">Ready</span><b id="breathTimer">60</b></div>
+          <div class="progress-track"><span id="breathProgress"></span></div><button class="btn btn-soft wide" id="breathStart">Start reset</button>
+        </article>
+        <article class="reset-card movement"><div class="reset-icon"><i data-lucide="move"></i></div><span class="reset-label">2 minutes</span><h3>Movement reset</h3><p>A tiny activity break can be easier than an ambitious plan.</p>
+          <div class="movement-steps"><button class="movement-step active">01 <b>Stretch</b></button><button class="movement-step">02 <b>Stand</b></button><button class="movement-step">03 <b>Walk</b></button></div>
+          <div class="movement-timer" id="movementTimer">02:00</div><button class="btn btn-soft wide" id="movementStart">Start timer</button>
+        </article>
+        <article class="reset-card hydration"><div class="reset-icon"><i data-lucide="droplets"></i></div><span class="reset-label">A gentle reminder</span><h3>Hydration pause</h3><p>Take a moment to drink some water. This is not hydration tracking.</p>
+          <div class="glass" id="waterGlass"><div class="water-fill" id="waterFill"></div><div class="droplets" id="droplets"></div></div>
+          <div class="water-copy" id="waterCopy">Tap the drops to fill the glass.</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section joy" id="joy">
+      <div class="joy-panel"><div><span class="eyebrow">06 · Joy missions</span><h2>Wellbeing isn't only about fixing problems.</h2><p>Choose a little time. We'll give you one delightful prompt.</p></div>
+        <div class="joy-actions"><button class="time-btn active" data-min="5">5 min</button><button class="time-btn" data-min="10">10 min</button><button class="time-btn" data-min="15">15 min</button></div>
+        <div class="joy-mission" id="joyMission">Listen to a song you love.</div><button class="btn btn-dark" id="newJoy">Give me another <i data-lucide="shuffle"></i></button>
+      </div>
+    </section>
+
+    <section class="section before-after" id="reflection">
+      <div class="section-heading centered"><span class="eyebrow">07 · Notice change</span><h2>Your mosaic, before and now.</h2><p>Your self-reported snapshot can change. That is worth noticing.</p></div>
+      <div class="compare-grid"><div class="compare-card" id="beforeCard"><span>YOUR MOSAIC BEFORE</span><div class="bars" id="beforeBars"></div></div><div class="compare-arrow"><i data-lucide="arrow-right"></i></div><div class="compare-card now" id="nowCard"><span>YOUR MOSAIC NOW</span><div class="bars" id="nowBars"></div></div></div>
+      <p class="center-note">Your self-reported snapshot changed. Small changes are worth noticing.</p>
+    </section>
+
+    <section class="section insight-section" id="insight">
+      <div class="insight-wrap"><div class="insight-spark">✦</div><div><span class="eyebrow">08 · Personal insight</span><h2 id="personalTitle">Your Mosaic today.</h2><p id="personalText">Your reported values are a starting point, not a verdict. Pick one small area that feels approachable.</p><button class="btn btn-primary" id="personalAction">Start my next step <i data-lucide="arrow-right"></i></button></div></div>
+      <div class="timeline"><div class="timeline-head"><span>Weekly reflection</span><small>Stored only in this browser</small></div><div id="timeline" class="timeline-list"></div></div>
+    </section>
+
+    <section class="section privacy" id="privacy">
+      <div class="privacy-card"><div class="privacy-icon"><i data-lucide="shield-check"></i></div><div><span class="eyebrow">Private by design</span><h2>Your data. Your control.</h2><p>MOSAIC is designed as a lightweight wellness experience. Your demo data stays in your browser. No personal information is required.</p><div class="privacy-actions"><button class="btn btn-soft" id="clearData">Clear my data</button><span id="clearStatus" role="status"></span></div></div></div>
+      <div class="safety"><i data-lucide="circle-alert"></i><p><strong>Safety note.</strong> MOSAIC is an educational wellness tool, not a medical or diagnostic service. If you have persistent symptoms or health concerns, consult a qualified healthcare professional.</p></div>
+    </section>
+
+    <section class="section final-cta">
+      <div class="final-inner"><span class="eyebrow">Tomorrow is another snapshot.</span><h2>You don't have to<br>change everything.</h2><strong>Start with one piece.</strong><p>Your wellbeing is a mosaic. Every piece matters, but you don't have to move them all at once.</p><button class="btn btn-primary" data-scroll="#builder">Build tomorrow's mosaic <i data-lucide="arrow-up-right"></i></button></div>
+    </section>
+  </main>
+
+  <footer><div class="footer-brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><b>MOSAIC</b></div><span>Your wellbeing is a system.</span><a href="#privacy">Privacy & safety</a></footer>
+
+  <dialog id="scienceModal" class="modal"><div class="modal-card"><button class="modal-close" id="modalClose" aria-label="Close"><i data-lucide="x"></i></button><span class="eyebrow" id="modalKicker">SCIENCE</span><h2 id="modalTitle">Sleep</h2><div class="modal-section"><span>What it is</span><p id="modalWhat"></p></div><div class="modal-section"><span>Why it matters</span><p id="modalWhy"></p></div><div class="modal-section"><span>What you can try</span><p id="modalTry"></p></div><div class="modal-sources"><span>Sources</span><div id="modalSources"></div></div></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
