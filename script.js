@@ -3,7 +3,7 @@
 "use strict";
 
 /* 0. BACKEND API CONNECTION */
-const API_BASE_URL = "https://mosaic-io5o.vercel.app";
+const API_BASE_URL = "https://mosaic-production-6f14.up.railway.app";
 const DEMO_USER_ID = "6d6ebef4-6b93-4071-be85-aa30281975fd";
 
 async function callAPI(endpoint, options = {}) {
