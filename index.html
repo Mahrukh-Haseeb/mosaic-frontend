@@ -54,16 +54,6 @@
         </div>
       </div>
     </section>
-
-    <section class="section how" id="how">
-      <div class="section-heading centered"><span class="eyebrow">A simpler way in</span><h2>Move one piece. See the bigger picture.</h2></div>
-      <div class="step-grid">
-        <article class="step-card lavender"><span class="step-number">01</span><i data-lucide="scan-eye"></i><h3>See</h3><p>Understand your current wellness snapshot without judging it.</p></article>
-        <article class="step-card mint"><span class="step-number">02</span><i data-lucide="shuffle"></i><h3>Experiment</h3><p>Change one factor and explore possible connections.</p></article>
-        <article class="step-card peach"><span class="step-number">03</span><i data-lucide="footprints"></i><h3>Act</h3><p>Turn an insight into one small, realistic action.</p></article>
-      </div>
-    </section>
-
     <section class="section builder" id="builder">
       <div class="section-heading"><span class="eyebrow">01 · Your snapshot</span><h2>Start with how you're feeling.</h2><p>There are no right answers. This is simply your personal snapshot.</p></div>
       <div class="builder-layout">
@@ -86,13 +76,20 @@
           <div id="fallbackEcosystem" class="fallback-ecosystem" aria-label="2D wellbeing ecosystem"></div>
           <div class="stage-hint"><i data-lucide="mouse-pointer-2"></i><span>Drag · scroll · select</span></div>
         </div>
-        <aside class="node-panel" id="nodePanel">
-          <div class="panel-kicker" id="nodeKicker">SELECT A PIECE</div>
-          <div class="node-title-row"><span class="node-icon" id="nodeIcon"></span><h3 id="nodeName">Your Mosaic</h3><strong id="nodeValue">—</strong></div>
-          <p id="nodeDescription">Select a pastel node to explore its everyday role and possible connections.</p>
-          <div class="connection-list" id="connectionList"></div>
-          <button class="btn btn-soft wide" id="explorePiece">Explore this piece <i data-lucide="arrow-right"></i></button>
-        </aside>
+       <aside class="node-panel" id="nodePanel">
+  <div class="panel-kicker" id="nodeKicker">SELECT A PIECE</div>
+  <div class="node-title-row">
+    <span class="node-icon" id="nodeIcon"></span>
+    <h3 id="nodeName">Your Mosaic</h3>
+    <strong id="nodeValue">—</strong>
+  </div>
+  <p id="nodeDescription">Select a pastel node to explore its everyday role and possible connections.</p>
+  <div class="connection-list" id="connectionList"></div>
+  <!-- 👇 ADD THIS LINE RIGHT HERE 👇 -->
+  <div id="microActions" class="micro-actions"></div>
+  <!-- 👆 ADD THIS LINE RIGHT HERE 👆 -->
+  <button class="btn btn-soft wide" id="explorePiece">Explore this piece <i data-lucide="arrow-right"></i></button>
+</aside>
       </div>
     </section>
 

@@ -30,3 +30,24 @@ footer{width:min(1160px,calc(100% - 40px));margin:0 auto;padding:28px 0 45px;bor
 @media(max-width:900px){.site-nav{width:calc(100% - 24px)}nav{gap:14px}.hero{grid-template-columns:1fr;min-height:auto;padding-top:145px}.hero-copy{text-align:center;margin:auto}.hero-copy>p{margin-left:auto;margin-right:auto}.hero-actions,.micro-note{justify-content:center}.hero-visual{min-height:480px}.builder-layout,.ecosystem-layout{grid-template-columns:1fr}.node-panel{position:relative;top:auto}.whatif-card{grid-template-columns:1fr;gap:15px;padding:35px}.ripple-visual{height:300px;order:2}.whatif-insight{border-left:0;border-top:1px solid var(--border);padding:25px 0 0}.guide-card{grid-template-columns:1fr}.guide-orb{width:80px;height:80px}.insight-section{grid-template-columns:1fr}.joy-panel{grid-template-columns:1fr}.joy-actions{grid-row:2}.joy-mission{grid-row:3}.reset-grid{grid-template-columns:1fr 1fr}.reset-card:last-child{grid-column:1/-1}.science-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.section{width:min(100% - 28px,1160px);padding:75px 0}.site-nav{height:58px;padding-left:15px}.mobile-menu{display:block}.mobile-menu svg{width:20px}nav{display:none;position:absolute;top:66px;left:0;right:0;background:white;border:1px solid var(--border);border-radius:16px;padding:12px;box-shadow:var(--shadow);flex-direction:column;align-items:stretch}.site-nav.menu-open nav{display:flex}.site-nav.menu-open .mobile-menu svg{display:none}.site-nav.menu-open .mobile-menu:after{content:"×";font-size:23px}.hero{padding-top:125px}.hero h1{font-size:48px}.hero-copy>p{font-size:15px}.hero-actions{flex-direction:column}.hero-visual{min-height:360px}.mini-ecosystem{width:355px}.hero-node{width:62px;height:62px;font-size:8px;border-width:4px}.hero-you{width:88px;height:88px;font-size:9px}.slider-grid{grid-template-columns:1fr}.step-grid,.science-grid,.reset-grid{grid-template-columns:1fr}.reset-card:last-child{grid-column:auto}.ecosystem-stage{height:500px}.whatif-copy h2{font-size:45px}.whatif-card{padding:25px}.ripple-visual{height:260px}.r3{width:240px;height:240px}.r2{width:180px;height:180px}.r1{width:125px;height:125px}.ripple-core{width:85px;height:85px;font-size:9px}.guide-card{padding:28px}.guide-content h2{font-size:28px}.joy-panel{padding:30px}.joy-panel h2{font-size:37px}.compare-grid{grid-template-columns:1fr}.compare-arrow{margin:auto;transform:rotate(90deg)}.bar-row{grid-template-columns:82px 1fr 20px}.insight-wrap{grid-template-columns:1fr}.privacy-card{grid-template-columns:1fr}.privacy-actions{flex-wrap:wrap}footer{flex-wrap:wrap}.final-inner{padding:55px 20px}.source-note{flex-wrap:wrap}.snapshot-card{min-height:420px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ambient,.mini-ecosystem,.ripple-ring{animation:none!important}.btn,.step-card,.science-card{transition:none}.breath-circle{transition:none}}
+/* Micro Actions */
+.micro-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+}
+.micro-action {
+    padding: 8px 16px;
+    border-radius: 30px;
+    border: 1.5px solid #e0e0e0;
+    background: #f5f5f5;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.micro-action:hover {
+    background: #9B8FEF;
+    color: white;
+    border-color: #9B8FEF;
+}

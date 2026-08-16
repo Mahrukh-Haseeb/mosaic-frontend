@@ -96,7 +96,34 @@ function renderSnapshot(){
   const avg=average();$("#overallScore").textContent=avg.toFixed(1);$("#scoreRing").style.setProperty("--score",`${avg*10}%`);
   $("#snapshotLabel").textContent=avg<4.5?"A gentle place to begin.":avg<6.5?"A balanced place to experiment.":"A strong snapshot to build from.";
 }
-
+/* 5.5 MICRO ACTIONS */
+function getMicroActions(factor) {
+    const actions = {
+        sleep: [
+            { icon: "🌙", label: "5-minute breathing reset", action: "startBreath()" },
+            { icon: "📱", label: "Digital sunset: no screens 30 min before bed", action: "toast('Try a digital sunset!')" }
+        ],
+        stress: [
+            { icon: "🧘", label: "60-second breathing reset", action: "startBreath()" },
+            { icon: "💧", label: "Hydration pause", action: "startHydration()" }
+        ],
+        movement: [
+            { icon: "🚶", label: "2-minute movement reset", action: "startMovement()" },
+            { icon: "🧘", label: "Stand up and stretch", action: "toast('Stand up and stretch!')" }
+        ],
+        nutrition: [
+            { icon: "🍎", label: "Add one serving of fruit today", action: "toast('Add a serving of fruit!')" },
+            { icon: "💧", label: "Hydration check", action: "startHydration()" }
+        ],
+        social: [
+            { icon: "💬", label: "Send a message to someone you value", action: "toast('Send that message!')" }
+        ],
+        joy: [
+            { icon: "🎵", label: "5-minute joy mission", action: "document.querySelector('#joy').scrollIntoView({behavior:'smooth'})" }
+        ]
+    };
+    return actions[factor] || [{ icon: "✨", label: "Explore this piece", action: "console.log('Explore')" }];
+}
 /* 5. ECOSYSTEM */
 function selectDimension(k,fromThree=false){
   if(!DIMS[k])return;state.selected=k;$("#nodeKicker").textContent="SELECTED PIECE";$("#nodeName").textContent=DIMS[k].name;
@@ -117,6 +144,15 @@ function buildFallback(){
 }
 function updateFallbackSelection(){
   $$(".fallback-node").forEach(n=>{const active=n.dataset.dim===state.selected;n.style.boxShadow=active?`0 0 0 6px ${DIMS[n.dataset.dim].color}33,0 14px 30px rgba(40,48,68,.1)`:"0 10px 20px rgba(40,48,68,.08)"});
+}
+// Add micro-actions
+const actions = getMicroActions(k);
+const actionHtml = actions.map(a =>
+    `<button class="micro-action" onclick="${a.action}">${a.icon} ${a.label}</button>`
+).join("");
+const microContainer = document.getElementById("microActions");
+if (microContainer) {
+    microContainer.innerHTML = actionHtml;
 }
 function initThree(){
   if(typeof THREE==="undefined"){showFallback();return}
