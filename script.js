@@ -292,6 +292,18 @@ function updateGuide() {
                 $("#guideWhy").textContent = insight;
                 $("#guideNext").textContent = g.next;
                 $("#startGuideReset").dataset.reset = g.reset;
+
+                // The backend generates up to 5 insights; show whichever ones
+                // beyond the first came back, instead of silently discarding them.
+                const rest = data.insights.slice(1).filter(Boolean);
+                const moreWrap = $("#guideMoreWrap"), moreList = $("#guideMoreList");
+                if (rest.length > 0) {
+                    moreList.innerHTML = rest.map(i => `<li>${i}</li>`).join("");
+                    moreWrap.style.display = "block";
+                } else {
+                    moreList.innerHTML = "";
+                    moreWrap.style.display = "none";
+                }
             } else {
                 // Fallback to her original logic
                 fallbackGuide();
@@ -306,6 +318,8 @@ function updateGuide() {
         $("#guideWhy").textContent = g.why;
         $("#guideNext").textContent = g.next;
         $("#startGuideReset").dataset.reset = g.reset;
+        $("#guideMoreList").innerHTML = "";
+        $("#guideMoreWrap").style.display = "none";
     }
 }
 $("#askGuide").addEventListener("click",()=>{updateGuide();document.querySelector("#guide").scrollIntoView({behavior:"smooth"})});
