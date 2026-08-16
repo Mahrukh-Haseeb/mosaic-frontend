@@ -426,7 +426,20 @@ function renderBeforeAfter(){
     : "No changes yet — try adjusting a piece of your mosaic above.";
 }
 function updateBeforeNow(){renderBars("#nowBars",state.values)}
-function recordReflection(action){state.reflection.push({date:new Date().toLocaleDateString(undefined,{weekday:"short"}),values:{...state.values},action});state.reflection=state.reflection.slice(-7)}
+function recordReflection(action){
+  const now=new Date();
+  const dateKey=now.toDateString(); // e.g. "Mon Aug 17 2026" — used only to detect same-day entries, never displayed
+  const label=now.toLocaleDateString(undefined,{weekday:"short"});
+  const existing=state.reflection[state.reflection.length-1];
+  if(existing && existing.dateKey===dateKey){
+    // Same calendar day as the last entry — update it in place instead of
+    // stacking a duplicate "Mon" bar for every reset completed today.
+    existing.values={...state.values};existing.action=action;
+  } else {
+    state.reflection.push({dateKey,date:label,values:{...state.values},action});
+  }
+  state.reflection=state.reflection.slice(-7);
+}
 function renderTimeline(){
   const t=$("#timeline");if(!state.reflection.length){t.innerHTML=`<div style="color:var(--text-muted);font-size:11px">Complete a reset to begin a lightweight reflection timeline.</div>`;return}
   t.innerHTML=state.reflection.map(r=>{const v=r.values.stress??5;return `<div class="timeline-item" title="${r.action||""}"><b>${v}</b><div class="timeline-bar" style="--h:${Math.max(10,v*12)}px"></div><small>${r.date}</small></div>`}).join("");
