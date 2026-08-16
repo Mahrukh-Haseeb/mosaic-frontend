@@ -190,14 +190,18 @@ function updateWhatIf() {
             const changes = data.predicted_impact.changes;
             let chain = [DIMS[k].short];
             for (const [factor, change] of Object.entries(changes)) {
+                if (factor === k) continue; // skip the factor the user just moved — it's not a "connection" to itself
                 if (Math.abs(change.delta) > 0.5) {
                     chain.push(factor.charAt(0).toUpperCase() + factor.slice(1));
                 }
             }
+            const otherFactors = Object.keys(changes).filter(f => f !== k).slice(0, 3);
             $("#pathChain").innerHTML = chain.map((x, i) => 
                 i ? `<i>→</i><span>${x}</span>` : `<span>${x}</span>`
             ).join("");
-            $("#whatIfText").textContent = `Changing ${DIMS[k].short} to ${v}/10 may influence ${Object.keys(changes).slice(0,3).join(', ')}.`;
+            $("#whatIfText").textContent = otherFactors.length
+                ? `Changing ${DIMS[k].short} to ${v}/10 may influence ${otherFactors.join(', ')}.`
+                : `Changing ${DIMS[k].short} to ${v}/10 is a good place to start experimenting.`;
             $("#whatIfCallout").textContent = "One change can touch more than one part of your wellbeing.";
         } else {
             // Fallback to her original logic
@@ -232,18 +236,31 @@ $("#whatIfRange").addEventListener("input",e=>{const k=state.whatIf,v=safeNum(e.
 function ripple(){const r=$("#rippleVisual");r.classList.remove("rippling");void r.offsetWidth;r.classList.add("rippling");}
 
 /* 8. AI-STYLE INSIGHTS */
-function updateGuide() {
+function bestGuideCandidate() {
     const v = state.values;
-    
+    const candidates = [
+        {score:(10-v.sleep)+v.stress,title:"Recovery may be a useful place to start.",why:`Your reported sleep is ${v.sleep<5?"relatively low":"moderate"} while your reported stress is ${v.stress>6?"relatively high":"not especially high"}. Sleep and stress can influence one another, so a small recovery-focused action may be a reasonable first experiment.`,next:"Try a 60-second breathing reset.",reset:"breath"},
+        {score:(10-v.movement)+2,title:"Movement may be an approachable place to begin.",why:`Your reported movement is ${v.movement<5?"relatively low":"moderate"}. A short activity break can be easier than trying to change everything at once.`,next:"Take a two-minute movement reset.",reset:"movement"},
+        {score:(10-v.social)+1,title:"Connection is part of wellbeing too.",why:`Your reported social connection is ${v.social<5?"relatively low":"moderate"}. Consider a small, low-pressure moment with someone you enjoy talking to.`,next:"Send one message to someone you value.",reset:"joy"},
+        {score:(10-v.joy)+1,title:"Make room for something enjoyable.",why:`Your reported joy is ${v.joy<5?"relatively low":"moderate"}. Wellbeing isn't only about productivity; making space for something enjoyable matters too.`,next:"Choose a five-minute joy mission.",reset:"joy"}
+    ];
+    if(v.stress>7)candidates[0].score+=3;
+    candidates.sort((a,b)=>b.score-a.score);
+    return candidates[0];
+}
+function updateGuide() {
     // Try to get AI insights from backend
     callAPI(`/ai/insights?user_id=${DEMO_USER_ID}`)
         .then(data => {
             if (data && data.insights && data.insights.length > 0) {
                 const insight = data.insights[0];
+                // Use the AI-generated text, but still derive which reset actually fits
+                // the user's current weakest area, instead of always defaulting to breathing.
+                const g = bestGuideCandidate();
                 $("#guideTitle").textContent = insight.split('.')[0] + '.';
                 $("#guideWhy").textContent = insight;
-                $("#guideNext").textContent = "Try one small experiment today.";
-                $("#startGuideReset").dataset.reset = "breath";
+                $("#guideNext").textContent = g.next;
+                $("#startGuideReset").dataset.reset = g.reset;
             } else {
                 // Fallback to her original logic
                 fallbackGuide();
@@ -253,15 +270,7 @@ function updateGuide() {
     
     // Her original logic (preserved as fallback)
     function fallbackGuide() {
-        const candidates = [
-            {score:(10-v.sleep)+v.stress,title:"Recovery may be a useful place to start.",why:`Your reported sleep is ${v.sleep<5?"relatively low":"moderate"} while your reported stress is ${v.stress>6?"relatively high":"not especially high"}. Sleep and stress can influence one another, so a small recovery-focused action may be a reasonable first experiment.`,next:"Try a 60-second breathing reset.",reset:"breath"},
-            {score:(10-v.movement)+2,title:"Movement may be an approachable place to begin.",why:`Your reported movement is ${v.movement<5?"relatively low":"moderate"}. A short activity break can be easier than trying to change everything at once.`,next:"Take a two-minute movement reset.",reset:"movement"},
-            {score:(10-v.social)+1,title:"Connection is part of wellbeing too.",why:`Your reported social connection is ${v.social<5?"relatively low":"moderate"}. Consider a small, low-pressure moment with someone you enjoy talking to.`,next:"Send one message to someone you value.",reset:"joy"},
-            {score:(10-v.joy)+1,title:"Make room for something enjoyable.",why:`Your reported joy is ${v.joy<5?"relatively low":"moderate"}. Wellbeing isn't only about productivity; making space for something enjoyable matters too.`,next:"Choose a five-minute joy mission.",reset:"joy"}
-        ];
-        if(v.stress>7)candidates[0].score+=3;
-        candidates.sort((a,b)=>b.score-a.score);
-        const g=candidates[0];
+        const g = bestGuideCandidate();
         $("#guideTitle").textContent = g.title;
         $("#guideWhy").textContent = g.why;
         $("#guideNext").textContent = g.next;
