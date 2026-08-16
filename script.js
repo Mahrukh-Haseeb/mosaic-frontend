@@ -43,7 +43,7 @@ const DEFAULTS = {sleep:6,movement:5,nutrition:7,stress:5,social:6,joy:6};
 const DEMO = {sleep:5,movement:3,nutrition:7,stress:8,social:4,joy:5};
 let state = {values:{...DEFAULTS}, before:{...DEFAULTS}, selected:"sleep", whatIf:"sleep", whatIfBefore:6, resetCompleted:false, reflection:[]};
 let three = null, sceneNodes = [], dragging = false, dragStart = {x:0,y:0};
-let breathInterval = null, movementInterval = null, breathRemaining = 60, movementRemaining = 120;
+let breathInterval = null, movementInterval = null, breathRemaining = 60, movementRemaining = 120, movementDurationSec = 120;
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const safeNum = (v,f=0) => Number.isFinite(Number(v)) ? Number(v) : f;
 
@@ -309,7 +309,7 @@ function updateGuide() {
     }
 }
 $("#askGuide").addEventListener("click",()=>{updateGuide();document.querySelector("#guide").scrollIntoView({behavior:"smooth"})});
-$("#startGuideReset").addEventListener("click",()=>{const r=$("#startGuideReset").dataset.reset;if(r==="breath")startBreath();else if(r==="movement")startMovement();else document.querySelector("#joy").scrollIntoView({behavior:"smooth"})});
+$("#startGuideReset").addEventListener("click",()=>{const r=$("#startGuideReset").dataset.reset;document.querySelector("#resets").scrollIntoView({behavior:"smooth"});if(r==="breath")setTimeout(startBreath,450);else if(r==="movement")setTimeout(startMovement,450);else document.querySelector("#joy").scrollIntoView({behavior:"smooth"})});
 function updatePersonal(){
   const v=state.values;let k=DIM_KEYS.reduce((best,x)=>Math.abs(v[x]-5)>Math.abs(v[best]-5)?x:best,"sleep");
   if(v.stress>7)k="stress";if(k==="stress"){$("#personalTitle").textContent="Your biggest opportunity may be recovery.";$("#personalText").textContent=`Your reported stress is ${v.stress}/10. Instead of changing everything at once, try one small recovery-focused action.`}
@@ -333,24 +333,57 @@ $("#modalClose").addEventListener("click",()=>$("#scienceModal").close());$("#sc
 
 /* 10. BREATHING RESET */
 function startBreath(){
-  if(breathInterval)return;breathRemaining=60;$("#breathStart").disabled=true;const circle=$("#breathCircle");
+  if(breathInterval)return;breathRemaining=60;
+  $("#breathStart").style.display="none";$("#breathStop").style.display="inline-flex";
+  const circle=$("#breathCircle");
   breathInterval=setInterval(()=>{breathRemaining--;const elapsed=60-breathRemaining,phase=elapsed%10;let label="Breathe in";if(phase>=4&&phase<6)label="Hold";else if(phase>=6)label="Breathe out";$("#breathState").textContent=label;$("#breathTimer").textContent=breathRemaining;$("#breathProgress").style.width=`${elapsed/60*100}%`;circle.classList.toggle("inhale",phase<4);circle.classList.toggle("exhale",phase>=6);
-    if(breathRemaining<=0){clearInterval(breathInterval);breathInterval=null;circle.classList.remove("inhale","exhale");$("#breathState").textContent="Nice work";$("#breathTimer").textContent="✓";$("#breathStart").disabled=false;state.resetCompleted=true;recordReflection("Breathing reset completed");toast("Nice work. Take a moment before continuing.");renderBeforeAfter();renderTimeline();saveState()}
+    if(breathRemaining<=0){clearInterval(breathInterval);breathInterval=null;circle.classList.remove("inhale","exhale");$("#breathState").textContent="Nice work";$("#breathTimer").textContent="✓";$("#breathStart").style.display="inline-flex";$("#breathStop").style.display="none";state.resetCompleted=true;recordReflection("Breathing reset completed");toast("Nice work. Take a moment before continuing.");renderBeforeAfter();renderTimeline();saveState()}
   },1000)
+}
+function stopBreath(){
+  if(!breathInterval)return;clearInterval(breathInterval);breathInterval=null;
+  const circle=$("#breathCircle");circle.classList.remove("inhale","exhale");
+  $("#breathState").textContent="Ready";$("#breathTimer").textContent="60";$("#breathProgress").style.width="0%";
+  $("#breathStart").style.display="inline-flex";$("#breathStop").style.display="none";
 }
 $("#breathStart").addEventListener("click",startBreath);
+$("#breathStop").addEventListener("click",stopBreath);
 
 /* 11. MOVEMENT RESET */
+function movementLabel(sec){return sec<60?`${sec} seconds`:`${sec/60} minute${sec===60?"":"s"}`}
+function renderMovementTimer(sec){const m=Math.floor(sec/60),s=sec%60;$("#movementTimer").textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`}
+function initDurationPicker(){
+  $$(".dur-btn").forEach(b=>b.addEventListener("click",()=>{
+    if(movementInterval)return;
+    $$(".dur-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+    movementDurationSec=Number(b.dataset.sec);movementRemaining=movementDurationSec;
+    renderMovementTimer(movementRemaining);
+    $("#movementDurationLabel").textContent=movementLabel(movementDurationSec);
+  }));
+}
 function startMovement(){
-  if(movementInterval)return;movementRemaining=120;$("#movementStart").disabled=true;
-  movementInterval=setInterval(()=>{movementRemaining--;const m=Math.floor(movementRemaining/60),s=movementRemaining%60;$("#movementTimer").textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;const idx=Math.min(2,Math.floor((120-movementRemaining)/40));$$(".movement-step").forEach((x,i)=>x.classList.toggle("active",i===idx));
-    if(movementRemaining<=0){clearInterval(movementInterval);movementInterval=null;$("#movementTimer").textContent="Done";$("#movementStart").disabled=false;state.resetCompleted=true;recordReflection("Movement reset completed");toast("Reset complete. Nice work.");renderBeforeAfter();renderTimeline();saveState()}
+  if(movementInterval)return;movementRemaining=movementDurationSec;
+  const totalSec=movementDurationSec;
+  $("#movementStart").style.display="none";$("#movementStop").style.display="inline-flex";
+  $$(".dur-btn").forEach(b=>b.disabled=true);
+  movementInterval=setInterval(()=>{movementRemaining--;renderMovementTimer(movementRemaining);const idx=Math.min(2,Math.floor((totalSec-movementRemaining)/(totalSec/3)));$$(".movement-step").forEach((x,i)=>x.classList.toggle("active",i===idx));
+    if(movementRemaining<=0){clearInterval(movementInterval);movementInterval=null;$("#movementTimer").textContent="Done";$("#movementStart").style.display="inline-flex";$("#movementStop").style.display="none";$$(".dur-btn").forEach(b=>b.disabled=false);state.resetCompleted=true;recordReflection("Movement reset completed");toast("Reset complete. Nice work.");renderBeforeAfter();renderTimeline();saveState()}
   },1000)
 }
+function stopMovement(){
+  if(!movementInterval)return;clearInterval(movementInterval);movementInterval=null;
+  $("#movementStart").style.display="inline-flex";$("#movementStop").style.display="none";
+  $$(".dur-btn").forEach(b=>b.disabled=false);
+  movementRemaining=movementDurationSec;renderMovementTimer(movementRemaining);
+  $$(".movement-step").forEach((x,i)=>x.classList.toggle("active",i===0));
+}
 $("#movementStart").addEventListener("click",startMovement);
+$("#movementStop").addEventListener("click",stopMovement);
 
 /* 12. HYDRATION */
-function initHydration(){const drops=$("#droplets");for(let i=0;i<9;i++){const b=document.createElement("button");b.className="drop";b.setAttribute("aria-label","Add a water drop");b.addEventListener("click",()=>{const n=Math.min(9,(Number(drops.dataset.count)||0)+1);drops.dataset.count=n;$("#waterFill").style.height=`${n/9*80}%`;if(n===9){$("#waterCopy").textContent="Take a moment to drink some water.";toast("A gentle hydration pause.");state.resetCompleted=true;recordReflection("Hydration pause");renderBeforeAfter();renderTimeline();saveState()}else $("#waterCopy").textContent=`${n}/9 drops — take a small pause.`});drops.appendChild(b)}}
+function initHydration(){const drops=$("#droplets");for(let i=0;i<9;i++){const b=document.createElement("button");b.className="drop";b.setAttribute("aria-label","Add a water drop");b.addEventListener("click",()=>{const n=Math.min(9,(Number(drops.dataset.count)||0)+1);drops.dataset.count=n;$("#waterFill").style.height=`${n/9*80}%`;if(n===9){$("#waterCopy").textContent="Take a moment to drink some water.";toast("A gentle hydration pause.");state.resetCompleted=true;recordReflection("Hydration pause");renderBeforeAfter();renderTimeline();saveState();$("#waterReset").style.display="inline-flex"}else $("#waterCopy").textContent=`${n}/9 drops — take a small pause.`});drops.appendChild(b)}}
+function resetHydration(){const drops=$("#droplets");drops.dataset.count=0;$("#waterFill").style.height="0%";$("#waterCopy").textContent="Tap the drops to fill the glass.";$("#waterReset").style.display="none"}
+$("#waterReset").addEventListener("click",resetHydration);
 
 /* 13. JOY MISSIONS */
 const MISSIONS={5:["Listen to a song you love.","Send someone a message.","Step outside for a few minutes.","Make something just for fun.","Spend time with a pet.","Do something creative.","Write down one thing you appreciated today."],10:["Make a favorite drink and enjoy it slowly.","Take a short walk somewhere pleasant.","Call someone you haven't spoken to recently.","Try a tiny creative project.","Read something purely for fun."],15:["Make a small meal you enjoy.","Take a longer walk without multitasking.","Do something creative with no outcome in mind.","Spend fifteen minutes with someone you care about.","Put on music and make your space feel good."]};
@@ -383,7 +416,7 @@ function runDemo(){
 $("#demoBtn").addEventListener("click",runDemo);$("#enterMosaic").addEventListener("click",()=>{document.querySelector("#ecosystem").scrollIntoView({behavior:"smooth"});selectDimension(state.selected);});$("#clearData").addEventListener("click",clearData);$("#personalAction").addEventListener("click",()=>{document.querySelector("#guide").scrollIntoView({behavior:"smooth"});});
 /* Initialisation */
 function init(){
-  loadState();initNavigation();renderSliders();renderSnapshot();buildFallback();initThree();initScience();initHydration();renderBeforeAfter();renderTimeline();setupWhatIf(state.selected);updateGuide();updatePersonal();icons();
+  loadState();initNavigation();renderSliders();renderSnapshot();buildFallback();initThree();initScience();initHydration();initDurationPicker();renderBeforeAfter();renderTimeline();setupWhatIf(state.selected);updateGuide();updatePersonal();icons();
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
