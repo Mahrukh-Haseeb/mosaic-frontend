@@ -132,6 +132,10 @@ function selectDimension(k,fromThree=false){
   $("#connectionList").innerHTML=DIMS[k].connections.map(x=>`<span>${x}</span>`).join("");
   $("#explorePiece").onclick=()=>{state.whatIf=k;setupWhatIf(k);document.querySelector("#whatif").scrollIntoView({behavior:"smooth"})};
   state.whatIf=k;setupWhatIf(k);icons();updateFallbackSelection();
+  const actions=getMicroActions(k);
+  const actionHtml=actions.map(a=>`<button class="micro-action" onclick="${a.action}">${a.icon} ${a.label}</button>`).join("");
+  const microContainer=document.getElementById("microActions");
+  if(microContainer){microContainer.innerHTML=actionHtml;}
 }
 function buildFallback(){
   const wrap=$("#fallbackEcosystem");wrap.innerHTML="";wrap.style.display="grid";
@@ -144,15 +148,6 @@ function buildFallback(){
 }
 function updateFallbackSelection(){
   $$(".fallback-node").forEach(n=>{const active=n.dataset.dim===state.selected;n.style.boxShadow=active?`0 0 0 6px ${DIMS[n.dataset.dim].color}33,0 14px 30px rgba(40,48,68,.1)`:"0 10px 20px rgba(40,48,68,.08)"});
-}
-// Add micro-actions
-const actions = getMicroActions(k);
-const actionHtml = actions.map(a =>
-    `<button class="micro-action" onclick="${a.action}">${a.icon} ${a.label}</button>`
-).join("");
-const microContainer = document.getElementById("microActions");
-if (microContainer) {
-    microContainer.innerHTML = actionHtml;
 }
 function initThree(){
   if(typeof THREE==="undefined"){showFallback();return}
