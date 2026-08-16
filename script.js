@@ -361,19 +361,27 @@ function initDurationPicker(){
     $("#movementDurationLabel").textContent=movementLabel(movementDurationSec);
   }));
 }
+function initMovementSteps(){
+  $$(".movement-step").forEach((btn,i)=>btn.addEventListener("click",()=>{
+    if(movementInterval)return; // don't let the manual pick fight the auto-advancing timer mid-run
+    $$(".movement-step").forEach((x,j)=>x.classList.toggle("active",j===i));
+  }));
+}
 function startMovement(){
   if(movementInterval)return;movementRemaining=movementDurationSec;
   const totalSec=movementDurationSec;
   $("#movementStart").style.display="none";$("#movementStop").style.display="inline-flex";
   $$(".dur-btn").forEach(b=>b.disabled=true);
+  $$(".movement-step").forEach(b=>b.disabled=true);
   movementInterval=setInterval(()=>{movementRemaining--;renderMovementTimer(movementRemaining);const idx=Math.min(2,Math.floor((totalSec-movementRemaining)/(totalSec/3)));$$(".movement-step").forEach((x,i)=>x.classList.toggle("active",i===idx));
-    if(movementRemaining<=0){clearInterval(movementInterval);movementInterval=null;$("#movementTimer").textContent="Done";$("#movementStart").style.display="inline-flex";$("#movementStop").style.display="none";$$(".dur-btn").forEach(b=>b.disabled=false);state.resetCompleted=true;recordReflection("Movement reset completed");toast("Reset complete. Nice work.");renderBeforeAfter();renderTimeline();saveState()}
+    if(movementRemaining<=0){clearInterval(movementInterval);movementInterval=null;$("#movementTimer").textContent="Done";$("#movementStart").style.display="inline-flex";$("#movementStop").style.display="none";$$(".dur-btn").forEach(b=>b.disabled=false);$$(".movement-step").forEach(b=>b.disabled=false);state.resetCompleted=true;recordReflection("Movement reset completed");toast("Reset complete. Nice work.");renderBeforeAfter();renderTimeline();saveState()}
   },1000)
 }
 function stopMovement(){
   if(!movementInterval)return;clearInterval(movementInterval);movementInterval=null;
   $("#movementStart").style.display="inline-flex";$("#movementStop").style.display="none";
   $$(".dur-btn").forEach(b=>b.disabled=false);
+  $$(".movement-step").forEach(b=>b.disabled=false);
   movementRemaining=movementDurationSec;renderMovementTimer(movementRemaining);
   $$(".movement-step").forEach((x,i)=>x.classList.toggle("active",i===0));
 }
@@ -394,7 +402,15 @@ $$(".time-btn").forEach(b=>b.addEventListener("click",()=>{$$(".time-btn").forEa
 function renderBars(target,values){
   const el=$(target);el.innerHTML=DIM_KEYS.map(k=>`<div class="bar-row"><span>${DIMS[k].short}</span><div class="bar-bg"><div class="bar-fill" style="width:${safeNum(values[k])*10}%;background:${DIMS[k].color}"></div></div><b>${safeNum(values[k])}</b></div>`).join("");
 }
-function renderBeforeAfter(){renderBars("#beforeBars",state.before);renderBars("#nowBars",state.values)}
+function renderBeforeAfter(){
+  renderBars("#beforeBars",state.before);renderBars("#nowBars",state.values);
+  const note=$(".center-note");
+  if(!note)return;
+  const changed=DIM_KEYS.some(k=>state.before[k]!==state.values[k]);
+  note.textContent=changed
+    ? "Your self-reported snapshot changed. Small changes are worth noticing."
+    : "No changes yet — try adjusting a piece of your mosaic above.";
+}
 function updateBeforeNow(){renderBars("#nowBars",state.values)}
 function recordReflection(action){state.reflection.push({date:new Date().toLocaleDateString(undefined,{weekday:"short"}),values:{...state.values},action});state.reflection=state.reflection.slice(-7)}
 function renderTimeline(){
@@ -416,7 +432,7 @@ function runDemo(){
 $("#demoBtn").addEventListener("click",runDemo);$("#enterMosaic").addEventListener("click",()=>{document.querySelector("#ecosystem").scrollIntoView({behavior:"smooth"});selectDimension(state.selected);});$("#clearData").addEventListener("click",clearData);$("#personalAction").addEventListener("click",()=>{document.querySelector("#guide").scrollIntoView({behavior:"smooth"});});
 /* Initialisation */
 function init(){
-  loadState();initNavigation();renderSliders();renderSnapshot();buildFallback();initThree();initScience();initHydration();initDurationPicker();renderBeforeAfter();renderTimeline();setupWhatIf(state.selected);updateGuide();updatePersonal();icons();
+  loadState();initNavigation();renderSliders();renderSnapshot();buildFallback();initThree();initScience();initHydration();initDurationPicker();initMovementSteps();renderBeforeAfter();renderTimeline();setupWhatIf(state.selected);updateGuide();updatePersonal();icons();
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
