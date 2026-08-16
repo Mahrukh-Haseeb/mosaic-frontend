@@ -69,15 +69,6 @@ function initNavigation(){
   menu.addEventListener("click",()=>{const open=nav.classList.toggle("menu-open");menu.setAttribute("aria-expanded",String(open))});
   $$("#navLinks a").forEach(a=>a.addEventListener("click",()=>nav.classList.remove("menu-open")));
   $$("[data-scroll]").forEach(b=>b.addEventListener("click",()=>document.querySelector(b.dataset.scroll)?.scrollIntoView({behavior:"smooth"})));
-  const buildTomorrow=$("#buildTomorrow");
-  if(buildTomorrow)buildTomorrow.addEventListener("click",()=>{
-    // "Tomorrow is another snapshot" — today's current values become the new
-    // baseline to compare against, instead of state.before staying frozen at
-    // whatever it was set to once (first load / last Clear Data).
-    state.before={...state.values};
-    renderBeforeAfter();saveState();
-    toast("Today's mosaic saved as your new baseline. Adjust the sliders for tomorrow.");
-  });
 }
 
 /* 4. PROFILE SLIDERS */
