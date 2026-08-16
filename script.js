@@ -39,9 +39,9 @@ const DIMS = {
     info:"Joy can include pleasure, curiosity, creativity, play and moments that feel meaningful or enjoyable.",connections:["Mood","Connection","Creativity","Energy"]}
 };
 const DIM_KEYS = Object.keys(DIMS);
-const DEFAULTS = {sleep:6,movement:5,nutrition:7,stress:5,social:6,joy:6};
+const DEFAULTS = {sleep:0,movement:0,nutrition:0,stress:0,social:0,joy:0};
 const DEMO = {sleep:5,movement:3,nutrition:7,stress:8,social:4,joy:5};
-let state = {values:{...DEFAULTS}, before:{...DEFAULTS}, selected:"sleep", whatIf:"sleep", whatIfBefore:6, resetCompleted:false, reflection:[]};
+let state = {values:{...DEFAULTS}, before:{...DEFAULTS}, selected:"sleep", whatIf:"sleep", whatIfBefore:0, resetCompleted:false, reflection:[]};
 let three = null, sceneNodes = [], dragging = false, dragStart = {x:0,y:0};
 let breathInterval = null, movementInterval = null, breathRemaining = 60, movementRemaining = 120, movementDurationSec = 120;
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
