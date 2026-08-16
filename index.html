@@ -31,7 +31,6 @@
   <main>
     <section class="hero section" id="hero">
       <div class="hero-copy">
-        <span class="eyebrow"><span class="eyebrow-dot"></span> Health · Wellness · Happiness</span>
         <h1>Your wellbeing<br>isn't one thing.<br><em>It's a system.</em></h1>
         <p>Explore how sleep, movement, nutrition, stress, connection and joy interact — and discover which small change you could make next.</p>
         <div class="hero-actions">
@@ -139,15 +138,29 @@
       <div class="reset-grid">
         <article class="reset-card breathing"><div class="reset-icon"><i data-lucide="wind"></i></div><span class="reset-label">60 seconds</span><h3>Breathing reset</h3><p>Slow down for a minute and give yourself a transition.</p>
           <div class="breath-circle" id="breathCircle"><span id="breathState">Ready</span><b id="breathTimer">60</b></div>
-          <div class="progress-track"><span id="breathProgress"></span></div><button class="btn btn-soft wide" id="breathStart">Start reset</button>
+          <div class="progress-track"><span id="breathProgress"></span></div>
+          <div class="reset-btn-row">
+            <button class="btn btn-soft wide" id="breathStart">Start reset</button>
+            <button class="btn btn-stop wide" id="breathStop" style="display:none">Stop</button>
+          </div>
         </article>
-        <article class="reset-card movement"><div class="reset-icon"><i data-lucide="move"></i></div><span class="reset-label">2 minutes</span><h3>Movement reset</h3><p>A tiny activity break can be easier than an ambitious plan.</p>
+        <article class="reset-card movement"><div class="reset-icon"><i data-lucide="move"></i></div><span class="reset-label" id="movementDurationLabel">2 minutes</span><h3>Movement reset</h3><p>A tiny activity break can be easier than an ambitious plan.</p>
           <div class="movement-steps"><button class="movement-step active">01 <b>Stretch</b></button><button class="movement-step">02 <b>Stand</b></button><button class="movement-step">03 <b>Walk</b></button></div>
-          <div class="movement-timer" id="movementTimer">02:00</div><button class="btn btn-soft wide" id="movementStart">Start timer</button>
+          <div class="duration-picker" id="movementDurationPicker">
+            <button class="dur-btn" data-sec="60">1 min</button>
+            <button class="dur-btn active" data-sec="120">2 min</button>
+            <button class="dur-btn" data-sec="300">5 min</button>
+          </div>
+          <div class="movement-timer" id="movementTimer">02:00</div>
+          <div class="reset-btn-row">
+            <button class="btn btn-soft wide" id="movementStart">Start timer</button>
+            <button class="btn btn-stop wide" id="movementStop" style="display:none">Stop timer</button>
+          </div>
         </article>
         <article class="reset-card hydration"><div class="reset-icon"><i data-lucide="droplets"></i></div><span class="reset-label">A gentle reminder</span><h3>Hydration pause</h3><p>Take a moment to drink some water. This is not hydration tracking.</p>
           <div class="glass" id="waterGlass"><div class="water-fill" id="waterFill"></div><div class="droplets" id="droplets"></div></div>
           <div class="water-copy" id="waterCopy">Tap the drops to fill the glass.</div>
+          <button class="btn btn-ghost wide" id="waterReset" style="display:none">Reset</button>
         </article>
       </div>
     </section>
